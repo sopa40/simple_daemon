@@ -1,16 +1,44 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/sysinfo.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 
-void write_message(char *message)
+
+#define SYS_INFO_FILE sys_info
+
+//creates new file named SYS_INFO_FILE and writes system information obtained from $ inxi -Fxz
+int write_sys_info(void)
 {
-    
+    FILE *sys_log = fopen("SYS_INFO_FILE", "w");
+    if(!sys_log)
+        exit(EXIT_FAILURE);
+
+    time_t now;
+    time(&now);
+    fprintf(sys_log, "Logs obtained at %s\n", ctime(&now));
+    fflush(sys_log);
+    return system("inxi -Fxz >> SYS_INFO_FILE");
+}
+
+//writes information according to log options
+//TODO: implement log options
+int write_current_state(FILE *log_file) {
+    struct sysinfo info;
+    int test = sysinfo(&info);
+    fprintf(log_file, "%lu\n", info.freeram);
+    fflush(log_file);
 }
 
 int main(void) {
+
+    if(write_sys_info()){
+        printf("smth went wrong\n");
+        exit(EXIT_FAILURE);
+    }
 
     /* Process ID and Session ID */
     pid_t pid, sid;
@@ -30,12 +58,15 @@ int main(void) {
     umask(0);
 
     /* Open log */
-    FILE *logptr = fopen("log","w");
-    if(!logptr)
+    FILE *log_file = fopen("log","w");
+    if(!log_file)
         exit(EXIT_FAILURE);
 
-    fprintf(logptr, "Log started\n");
-    fflush(logptr);
+    fprintf(log_file, "Log started\n");
+    fflush(log_file);
+
+    write_current_state(log_file);
+
 
     /* Create a new SID for the child process */
     sid = setsid();
@@ -43,8 +74,8 @@ int main(void) {
         /* TODO: Log the failure */
         exit(EXIT_FAILURE);
 
-    fprintf(logptr, "After sid\n");
-    fflush(logptr);
+    fprintf(log_file, "After sid\n");
+    fflush(log_file);
 
     /* Change the current working directory */
     if ((chdir("/")) < 0) {
@@ -61,11 +92,11 @@ int main(void) {
     /* The Big Loop */
     while (1) {
         /* Do some task here ... */
-        fprintf(logptr, "Logging\n");
-        fflush(logptr);
+        fprintf(log_file, "Logging\n");
+        fflush(log_file);
         sleep(10);
     }
 
-    fclose(logptr);
+    fclose(log_file);
     exit(EXIT_SUCCESS);
 }
