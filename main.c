@@ -9,23 +9,25 @@
 #include <argp.h>
 
 
-
+#define LOG_FILE_NAME "log"
 #define SYS_INFO_FILE "sys_info"
 #define GET_SYS_INFO "inxi -Fxz >> " SYS_INFO_FILE
 
-#define LOG_FILE_NAME "log"
+
+
+#define MAX_FRQNC_LVL 3
+#define MIN_FRQNC_LVL 1
 
 const char *argp_program_version = "simple_daemon 1.0";
 const char *argp_program_bug_address = "<hazik991@gmail.com>";
 
 //for parcing arguments
 struct arguments {
-  char *args[2];            /* ARG1 and ARG2 */
   int verbose;              /* The -v flag */
-  int automatic;                 /* The -a flag */
+  int automatic;            /* The -a flag */
   int info;                 /* The -i flag */
   int status;               /* The -s flag */
-  char *frequency_level;  /* Argument for -f */
+  char *frequency_level;    /* Argument for -f */
 };
 
 /*
@@ -37,9 +39,7 @@ static struct argp_option options[] = {
   {"automatic", 'a', 0, 0, "Set automatic settings for logging format"},
   {"info", 'i', 0, 0, "Write system information in " SYS_INFO_FILE},
   {"status", 's', 0, 0, "Write log in "},
-  {"frequency", 'f', "FRQNC_LVL", 0, "Frequency of logging"},
-  // {"output",  'o', "OUTFILE", 0,
-  // "Output to OUTFILE instead of to standard output"},
+  {"frequency", 'f', "LEVEL", 0, "Frequency of logging 1-3"},
   {0}
 };
 
@@ -59,6 +59,8 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
             arguments->verbose = 1;
             break;
         case 'f':
+            if (atoi(arg) > MAX_FRQNC_LVL || atoi(arg) < MIN_FRQNC_LVL)
+                argp_usage(state);
             arguments->frequency_level = arg;
             break;
         case 's':
@@ -67,15 +69,6 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
         case 'i':
             arguments->info = 1;
             break;
-        case ARGP_KEY_ARG:
-            if (state->arg_num >= 2)
-                argp_usage(state);
-            arguments->args[state->arg_num] = arg;
-            break;
-        case ARGP_KEY_END:
-            if (state->arg_num < 2)
-                argp_usage (state);
-                break;
         default:
             return ARGP_ERR_UNKNOWN;
         }
@@ -88,20 +81,17 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
    A description of the non-option command-line arguments
      that we accept.
 */
-static char args_doc[] = "ARG1 ARG2";
-
 
 /*
   DOC.  Field 4 in ARGP.
   Program documentation.
 */
-static char doc[] =
-"simple_daemon -- A program to log different system info.\vby Nazar Sopiha";
+static char doc[] = "simple_daemon -- A program to log different system info.\vby Nazar Sopiha";
 
 /*
    The ARGP structure itself.
 */
-static struct argp argp = {options, parse_opt, args_doc, doc};
+static struct argp argp = {options, parse_opt, 0, doc};
 
 
 
@@ -111,24 +101,26 @@ int write_sys_info(void)
     FILE *sys_log = fopen(SYS_INFO_FILE, "w");
     if(!sys_log)
         exit(EXIT_FAILURE);
-
     time_t now;
     time(&now);
     fprintf(sys_log, "Logs obtained at %s\n", ctime(&now));
-    fflush(sys_log);
-    return system(GET_SYS_INFO);
+    fclose(sys_log);
+    return 0;//system(GET_SYS_INFO);
 }
 
-//writes information according to log options
+//write information according to log options
 //TODO: implement log options
-int write_current_state(FILE *log_file) {
+void write_current_state(FILE *log_file)
+{
     struct sysinfo info;
-    int test = sysinfo(&info);
-    if(test){
+    if (sysinfo(&info)) {
         fprintf(log_file, "Error obtaining info\n");
         fflush(log_file);
         exit(EXIT_FAILURE);
     }
+    time_t now;
+    time(&now);
+    fprintf(log_file, "Logs obtained at %s\n", ctime(&now));
     fprintf(log_file, "%lu\n", info.freeram);
     fflush(log_file);
 }
@@ -136,31 +128,19 @@ int write_current_state(FILE *log_file) {
 int main(int argc, char **argv)
 {
     struct arguments arguments;
-    FILE *outstream = stdout;
 
     /* Set argument defaults */
-    // arguments.outfile = NULL;
     arguments.frequency_level = "";
     arguments.verbose = 0;
     arguments.automatic = 0;
     arguments.info = 0;
     arguments.status = 0;
 
-    /* Where the magic happens */
+    /* parsing arguments */
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
 
     /* Print argument values */
-    fprintf (outstream, "frequency = %s\n\n",
-       arguments.frequency_level);
-    fprintf (outstream, "ARG1 = %s\nARG2 = %s\n\n",
-       arguments.args[0],
-       arguments.args[1]);
-
-
-    if(write_sys_info()){
-        printf("smth went wrong writing system info\n");
-        exit(EXIT_FAILURE);
-    }
+    //printf ("frequency = %s\n\n", arguments.frequency_level);
 
     /* Process ID and Session ID */
     pid_t pid, sid;
@@ -181,14 +161,13 @@ int main(int argc, char **argv)
 
     /* Open log */
     FILE *log_file = fopen(LOG_FILE_NAME,"w");
-    if(!log_file)
+    if (!log_file)
         exit(EXIT_FAILURE);
 
-    fprintf(log_file, "Log started\n");
+    time_t now;
+    time(&now);
+    fprintf(log_file, "Logs obtained at %s\n", ctime(&now));
     fflush(log_file);
-
-    write_current_state(log_file);
-
 
     /* Create a new SID for the child process */
     sid = setsid();
@@ -210,12 +189,24 @@ int main(int argc, char **argv)
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
 
-    /* Daemon-specific initialization goes here */
-    /* The Big Loop */
-    while (1) {
-        /* Do some task here ... */
-        fprintf(log_file, "Logging\n");
+    fprintf(log_file, "before writing sys info\n");
+    fflush(log_file);
+
+    int test = write_sys_info();
+    if (test) {
+        fprintf(log_file, "smth went wrong writing system info\n");
         fflush(log_file);
+        exit(EXIT_FAILURE);
+    }
+    else {
+        fprintf(log_file, "else\n");
+        fflush(log_file);
+    }
+
+    /* Daemon-specific initialization */
+    while (1) {
+        write_current_state(log_file);
+        //TODO: sleep according to frequency level
         sleep(10);
     }
 
