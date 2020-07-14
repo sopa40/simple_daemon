@@ -11,15 +11,16 @@
 //for defines e.g. LOG_INFO
 #include <sys/syslog.h>
 
-#define LOGI(fmt, ...)  logger("[I]" fmt "\n", ## __VA_ARGS__)
+#include "logging.h"
+#include "daemonize.h"
+
 
 #define LOG_FILE_NAME "/tmp/log"
 #define SYS_INFO_FILE "sys_info"
-#define GET_SYS_INFO "inxi -Fxz >> " SYS_INFO_FILE
+#define GET_SYS_INFO "inxi -Fxz > " SYS_INFO_FILE
 #define LOGGING_TAG "[daemon]"
-#define TOO_BIG_MSG "Message is too big. Can not be written"
-
-#define SIZE_OF_BUF 20
+#define TOO_BIG_MSG "Message is too big. Can not be written\n"
+#define WRONG_MSG_TYPE "This message is not informative. Skipped... \n"
 
 const char *argp_program_version = "simple_daemon 1.0";
 const char *argp_program_bug_address = "<hazik991@gmail.com>";
@@ -30,7 +31,7 @@ struct arguments {
   int automatic;            /* The -a flag */
   int info;                 /* The -i flag */
   int status;               /* The -s flag */
-  int frequency_level;    /* Argument for -f */
+  int frequency_level;      /* The argument for -f option */
 };
 
 /**
@@ -41,7 +42,7 @@ static struct argp_option options[] = {
   {"verbose", 'v', 0, 0, "Produce verbose output", 0},
   {"automatic", 'a', 0, 0, "Set automatic settings for logging format", 0},
   {"info", 'i', 0, 0, "Write system information in " SYS_INFO_FILE, 0},
-  {"status", 's', 0, 0, "Write log in ", 0},
+  {"status", 's', 0, 0, "Write logs in " LOG_FILE_NAME, 0},
   {"frequency", 'f', "FRQNC_LVL", 0, "Frequency of logging", 0},
   {0}
 };
@@ -55,11 +56,11 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
     int frqnc;
     struct arguments *arguments = state->input;
     switch (key) {
-        case 'a':
-            arguments->automatic = 1;
-            break;
         case 'v':
             arguments->verbose = 1;
+            break;
+        case 'a':
+            arguments->automatic = 1;
             break;
         case 'f':
             frqnc = atoi(arg);
@@ -83,7 +84,6 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
   DOC.  Field 4 in ARGP.
   Program documentation.
 */
-
 static char doc[] =
 "simple_daemon -- A program to log different system info.\vby Nazar Sopiha";
 
@@ -91,37 +91,6 @@ static char doc[] =
    The ARGP structure itself.
 */
 static struct argp argp = {options, parse_opt, 0, doc, 0, 0, 0};
-
-
-/**
-    logging function
-*/
-int logger(char const *fmt, ...)
-{
-    char buf[SIZE_OF_BUF];
-    unsigned int src_size;
-    va_list args;
-    static FILE *log_file = NULL;
-    if (!log_file)
-        log_file = fopen(LOG_FILE_NAME,"w+");
-    if (!log_file)
-        exit(EXIT_FAILURE);
-    va_start(args, fmt);
-    src_size = vsnprintf(buf, SIZE_OF_BUF, fmt, args);
-    if (src_size > SIZE_OF_BUF) {
-        memcpy(buf, TOO_BIG_MSG, SIZE_OF_BUF);
-    }
-    va_end(args);
-    fprintf(log_file, "%s\n", buf);
-    fflush(log_file);
-    return 0;
-
-    // time_t now;
-    // time(&now);
-    // fprintf(log_file, "%s -- %s\n", now, now );
-    // //fprintf(log_file, "%s: " LOGGING_TAG " %s\n", ctime(&now), message);
-    // fflush(log_file);
-}
 
 /** creates new file named SYS_INFO_FILE
  *and writes system information obtained from $ inxi -Fxz
@@ -138,8 +107,8 @@ int write_sys_info(void)
     return system(GET_SYS_INFO);
 }
 
-///writes information according to log options
 //TODO: implement log options
+/** writes information according to log options */
 void write_current_state(void)
 {
     struct sysinfo info;
@@ -152,8 +121,8 @@ void write_current_state(void)
 
 int main(int argc, char **argv)
 {
+    LOGI("TEST");
     struct arguments arguments;
-    pid_t pid, sid;
     short wait_time;
 
     /** Set argument defaults */
@@ -166,34 +135,6 @@ int main(int argc, char **argv)
     /** parce arguments */
     argp_parse (&argp, argc, argv, 0, 0, &arguments);
 
-    pid = fork();
-    if (pid < 0)
-        exit(EXIT_FAILURE);
-
-    if (pid > 0)
-        exit(EXIT_SUCCESS);
-
-    umask(0);
-
-    /** Create a new SID for the child process */
-    sid = setsid();
-    if (sid < 0) {
-        //log failure
-        LOGI("Failed to set session ID. Exit...");
-        exit(EXIT_FAILURE);
-    }
-
-    if (arguments.info) {
-        if (write_sys_info()) {
-            LOGI("smth went wrong writing system info\n");
-        }
-    }
-
-    /** Change the current working directory */
-    if ((chdir("/")) < 0) {
-        LOGI("Error changing directory. Terminating...\n");
-        exit(EXIT_FAILURE);
-    }
 
     switch (arguments.frequency_level) {
         case 0:
@@ -212,10 +153,13 @@ int main(int argc, char **argv)
             exit(EXIT_FAILURE);
     }
 
-    /** close out the standard file descriptors */
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
+    if (arguments.info) {
+        if (write_sys_info()) {
+            LOGI("smth went wrong writing system info\n");
+        }
+    }
+
+    daemonize();
 
     /* Daemon-specific initialization */
     while (1) {

@@ -2,6 +2,7 @@ TARGET ?= myDaemon
 DEBUG ?= 0
 BUILDDIR := .build
 SRC := main.c
+SRC += daemonize.c logging.c
 #SRC += dlfunc_cos.c
 DEFINES := DEBUG=$(DEBUG)
 CC = gcc
