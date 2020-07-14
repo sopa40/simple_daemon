@@ -10,24 +10,27 @@ void daemonize()
 {
     pid_t pid, sid;
     pid = fork();
-    if (pid < 0)
+    if (pid < 0) {
+        LOGI("Failed to fork. Exit...!");
         exit(EXIT_FAILURE);
+    }
 
-    if (pid > 0)
+    if (pid > 0){
         exit(EXIT_SUCCESS);
-
+    }
+    else {
+    }
     umask(0);
-
     /** Create a new SID for the child process */
     sid = setsid();
     if (sid < 0) {
-        //LOGI("Failed to set session ID. Exit...");
+        LOGI("Failed to set session ID. Exit...");
         exit(EXIT_FAILURE);
     }
 
     /** Change the current working directory */
     if ((chdir("/")) < 0) {
-        //LOGI("Error changing directory. Terminating...\n");
+        LOGI("Error changing directory. Terminating...");
         exit(EXIT_FAILURE);
     }
 

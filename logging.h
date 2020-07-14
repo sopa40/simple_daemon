@@ -3,9 +3,9 @@
 #include <stddef.h>
 #include <string.h>
 
-
+#define LOGGING_TAG "[daemon]"
 #define LOG_LEVEL PLOG_INFO
-#define LOGI(fmt, ...)  plog(LOG_LEVEL, "%s: " LOGGING_TAG " [I] " fmt "\n", __TIME__, ## __VA_ARGS__)
+#define LOGI(fmt, ...)  plog(LOG_LEVEL, "%s: " LOGGING_TAG " [I] " fmt, "\n" __TIME__, ## __VA_ARGS__)
 
 //#define LOG_SYSLOG
 
