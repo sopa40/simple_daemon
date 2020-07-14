@@ -87,7 +87,7 @@ static struct argp argp = {options, parse_opt, 0, doc, 0, 0, 0};
 
 int main(int argc, char **argv)
 {
-    //daemonize();
+    daemonize();
     struct arguments arguments;
     short wait_time;
 
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 
     /* Daemon-specific initialization */
     while (1) {
-        //write_current_state();
+        write_current_state();
         sleep(wait_time);
     }
 

@@ -2,9 +2,9 @@ TARGET ?= myDaemon
 BUILDDIR := .build
 SRC := main.c
 SRC += logging.c daemonize.c writers.c
-DEFINES := LOG_SYSLOG
+#DEFINES := LOG_SYSLOG
 CC = gcc
-CFLAGS = -O2 -std=gnu18 -Wall -Wextra -pedantic
+CFLAGS = -O2 -Wall -Wextra
 LDFLAGS :=
 
 DEFINES := $(addprefix -D,$(DEFINES))

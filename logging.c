@@ -44,6 +44,7 @@ static void put_log(char *buf, size_t buf_len, int msg_len)
      * - there is no other way to print logs
      */
     fwrite(buf, sizeof(char), to_write, pFile);
+    fflush(pFile);
     if (msg_len < 0)
         fwrite(overflow, sizeof(char), strlen(overflow), pFile);
 }
