@@ -1,4 +1,4 @@
-TARGET ?= myDaemon
+TARGET ?= simple_daemon
 BUILDDIR := .build
 SRC := main.c
 SRC += logging.c daemonize.c writers.c
