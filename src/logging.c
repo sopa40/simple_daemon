@@ -37,12 +37,24 @@ char* get_time(void)
 {
     time_t mytime = time(NULL);
     char* time_str = ctime(&mytime);
-    time_str[strlen(time_str)-1] = ' ';
+    time_str[strlen(time_str) - 1] = ' ';
     return time_str;
 }
 
-int form_log(char *to, size_t size,
-             char *fmt, va_list args)
+/*!
+* \brief                Formats buffer to write it in log later
+*
+* \warning              It might have 0 or more arguments args
+*
+* \param[to]            Destination buffer.
+* \param[size]          Size of arguments
+* \param[fmt]           Format string
+* \param[args]          Arguments to insert in format string
+*
+* \return               Size of string on success, -1 on failure
+*/
+static int form_log(char *to, size_t size,
+                    char *fmt, va_list args)
  {
     int tsize;
 
@@ -57,15 +69,15 @@ int form_log(char *to, size_t size,
 
 
 /**
-     * \brief               Prints buffer into a log file
-     *
-     *
-     * \param[buf]           Source buffer
-     * \param[buf_len]       Length of buffer
-     * \param[msg_len]      Length of message
-     *
-     */
-static void put_log(char *buf, size_t buf_len, int msg_len)
+* \brief               Prints buffer into a log file
+*
+*
+* \param[buf]           Source buffer
+* \param[buf_len]       Length of buffer
+* \param[msg_len]      Length of message
+*
+*/
+void put_log(char *buf, size_t buf_len, int msg_len)
 {
     const char *overflow = "*** missing symbols - message too long ***\n";
     size_t to_write = msg_len > 0 ? (size_t) msg_len : buf_len;
@@ -81,9 +93,10 @@ static void put_log(char *buf, size_t buf_len, int msg_len)
      * - there is no other way to print logs
      */
     fwrite(buf, sizeof(char), to_write, pFile);
-    fflush(pFile);
     if (msg_len < 0)
         fwrite(overflow, sizeof(char), strlen(overflow), pFile);
+
+    fflush(pFile);
 }
 #endif //#ifndef LOG_SYSLOG
 

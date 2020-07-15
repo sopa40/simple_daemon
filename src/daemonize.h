@@ -20,10 +20,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define DAEMONIZE_H
 
 
-/*!
-     * \brief               Starts the daemon
-     *
-     */
+///
+/// \brief               Starts the daemon
+///
+///
 void daemonize();
 
 #endif // DAEMONIZE_H
