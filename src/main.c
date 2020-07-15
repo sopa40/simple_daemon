@@ -54,7 +54,7 @@ struct arguments {
    Order of fields: {NAME, KEY, ARG, FLAGS, DOC}.
 */
 static struct argp_option options[] = {
-    {"automatic", 'a', 0, 0, "Set automatic settings for logging format", 0},
+    {"automatic", 'a', 0, 0, "Set automatic settings for logging format (-i, -f2, -s2)", 0},
     {"info", 'i', 0, 0, "Write system information in " SYS_INFO_FILE, 0},
     {"status", 's', "STATUS_LVL", 0, "Write logs in " LOG_FILE_NAME, 0},
     {"frequency", 'f', "FRQNC_LVL", 0, "Frequency of logging", 0},
