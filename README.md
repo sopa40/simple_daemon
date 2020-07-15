@@ -40,7 +40,7 @@ and then with obtained pid
 
 ## Build and run test
 
-Testing made with Google Test
+Testing made with Google testing framework (gtest)
 
 Go to project folder
 
