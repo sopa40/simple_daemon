@@ -29,12 +29,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define LOGGING_TAG "[daemon]"
 #define LOG_LEVEL PLOG_INFO
 
+
 /*!
 * \brief                Returns current time
 *
 * \warning              No error handling
 *
-* \return               current time on success
+*\return                Current time as char* (String)
+*
 */
 char* get_time(void);
 
