@@ -1,3 +1,22 @@
+/*-----------------------------------------------------------------------
+A simple daemon project that monitors the system information and logs some information.
+Copyright (C) 2020  Nazar Sopiha
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+------------------------------------------------------------------------*/
+
+
 #ifndef LOGGING_H
 #define LOGGING_H
 
@@ -32,7 +51,7 @@ typedef enum LogLevel {
 
 #ifndef LOG_SYSLOG
 
-/**
+/*!
      * \brief               Formats buffer to write it in log later
      *
      * \warning                It might have 0 or more arguments args
@@ -50,7 +69,7 @@ int form_log(char *to, size_t size,
 #endif //#ifndef LOG_SYSLOG
 
 
-/**
+/*!
      * \brief               Prints message in custom log file or in syslog
      *
      * \warning                Currently log level is only a measure whether to print log or not
