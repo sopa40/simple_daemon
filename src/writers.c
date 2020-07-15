@@ -44,13 +44,21 @@ int write_sys_info(void)
 }
 
 //TODO: implement log options
-int write_current_state(void)
+int write_current_state(int status_level)
 {
     struct sysinfo info;
     if (sysinfo(&info)) {
         LOGI("Error obtaining info");
         return -1;
     }
-    LOGI("%lu", info.freeram);
+    LOGI("Seconds since boot %ld", info.uptime);
+    if (status_level > 1)
+        LOGI("Total memory: %lu", info.totalram);
+        LOGI("Free memory: %lu", info.freeram);
+    if (status_level > 2) {
+        LOGI("Memory used by buffers: %lu", info.bufferram);
+        LOGI("Number of proccesses running: %hu", info.procs);
+    }
+    LOGI("---------End log iteration---------");
     return 0;
 }

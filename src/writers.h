@@ -41,7 +41,7 @@ int write_sys_info(void);
     *
     * \return               0 on success, -1 on failure
     */
-void write_current_state(void);
+int write_current_state(int status_level);
 
 
 #endif // WRITERS_H

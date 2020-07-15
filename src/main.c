@@ -43,8 +43,8 @@ struct arguments {
     int automatic;
     /// The -i flag
     int info;
-    /// The -s flag
-    int status;
+    /// The argument for -s option
+    int status_level;
     /// The argument for -f option
     int frequency_level;
 };
@@ -56,7 +56,7 @@ struct arguments {
 static struct argp_option options[] = {
     {"automatic", 'a', 0, 0, "Set automatic settings for logging format", 0},
     {"info", 'i', 0, 0, "Write system information in " SYS_INFO_FILE, 0},
-    {"status", 's', 0, 0, "Write logs in " LOG_FILE_NAME, 0},
+    {"status", 's', "STATUS_LVL", 0, "Write logs in " LOG_FILE_NAME, 0},
     {"frequency", 'f', "FRQNC_LVL", 0, "Frequency of logging", 0},
     {0}
 };
@@ -67,7 +67,7 @@ static struct argp_option options[] = {
 */
 static error_t parse_opt (int key, char *arg, struct argp_state *state)
 {
-    int frqnc;
+    int frqnc, status;
     struct arguments *arguments = state->input;
     switch (key) {
         case 'a':
@@ -80,7 +80,10 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
             arguments->frequency_level = frqnc;
             break;
         case 's':
-            arguments->status = 1;
+            status = atoi(arg);
+            if (status > 3 || status < 1)
+                argp_usage (state);
+            arguments->status_level = status;
             break;
         case 'i':
             arguments->info = 1;
@@ -111,7 +114,7 @@ int main(int argc, char **argv)
     /** Set argument defaults */
     arguments.automatic = 0;
     arguments.info = 0;
-    arguments.status = 0;
+    arguments.status_level = 1;
     arguments.frequency_level = 0;
 
     /** parce arguments */
@@ -119,7 +122,7 @@ int main(int argc, char **argv)
 
     if (arguments.automatic) {
         arguments.info = 1;
-        arguments.status = 1;
+        arguments.status_level = 2;
         arguments.frequency_level = 2;
     }
 
@@ -146,10 +149,10 @@ int main(int argc, char **argv)
         }
     }
 
-    daemonize();
+    //daemonize();
 
     while (1) {
-        write_current_state();
+        write_current_state(arguments.status_level);
         sleep(wait_time);
     }
 

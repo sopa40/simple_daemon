@@ -33,6 +33,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef LOG_SYSLOG
 
+char* get_time(void)
+{
+    time_t mytime = time(NULL);
+    char* time_str = ctime(&mytime);
+    time_str[strlen(time_str)-1] = ' ';
+    return time_str;
+}
 
 int form_log(char *to, size_t size,
              char *fmt, va_list args)

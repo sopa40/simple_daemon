@@ -24,10 +24,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdarg.h>
 #include <stddef.h>
 #include <string.h>
+#include <time.h>
 
 #define LOGGING_TAG "[daemon]"
 #define LOG_LEVEL PLOG_INFO
-#define LOGI(fmt, ...)  plog(LOG_LEVEL, "%s: " LOGGING_TAG " [I] " fmt, "\n" __TIME__, ## __VA_ARGS__)
+
+/*!
+     * \brief                Returns current time
+     *
+     * \warning              No error handling
+     *
+     * \return               current time on success
+     */
+char* get_time(void);
+
+#define LOGI(fmt, ...)  plog(LOG_LEVEL, "%s %s: " LOGGING_TAG "[I] " fmt, "\n", get_time(), ## __VA_ARGS__)
 
 //#define LOG_SYSLOG
 
@@ -51,17 +62,18 @@ typedef enum LogLevel {
 
 #ifndef LOG_SYSLOG
 
+
 /*!
-     * \brief               Formats buffer to write it in log later
+     * \brief                Formats buffer to write it in log later
      *
-     * \warning                It might have 0 or more arguments args
+     * \warning              It might have 0 or more arguments args
      *
      * \param[to]            Destination buffer.
-     * @param[size]          Size of arguments
-     * @param[fmt]           Format string
-     * @param[args]          Arguments to insert in format string
+     * \param[size]          Size of arguments
+     * \param[fmt]           Format string
+     * \param[args]          Arguments to insert in format string
      *
-     * @return              Size of string on success, -1 on failure
+     * \return               Size of string on success, -1 on failure
      */
 int form_log(char *to, size_t size,
              char *fmt, va_list args);
@@ -70,12 +82,12 @@ int form_log(char *to, size_t size,
 
 
 /*!
-     * \brief               Prints message in custom log file or in syslog
+     * \brief                Prints message in custom log file or in syslog
      *
-     * \warning                Currently log level is only a measure whether to print log or not
+     * \warning              log file /tmp/log will be opened, but not closed properly.
      *
      * \param[log_level]     Level of logging
-     * @param[format]        Format string
+     * \param[format]        Format string
      *
      */
 void plog(LogLevel log_level, char *format, ...);
