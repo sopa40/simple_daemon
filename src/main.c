@@ -152,7 +152,7 @@ int main(int argc, char **argv)
     daemonize();
 
     while (1) {
-        //write_current_state(arguments.status_level);
+        write_current_state(arguments.status_level);
         sleep(wait_time);
     }
 
