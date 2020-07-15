@@ -149,7 +149,7 @@ int main(int argc, char **argv)
         }
     }
 
-    //daemonize();
+    daemonize();
 
     while (1) {
         //write_current_state(arguments.status_level);

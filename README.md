@@ -30,6 +30,14 @@ No Latex is created, but you can fix it in dconfig.
 
 Done. Execute with `$ ./simple_daemon` and options that you prefer.
 
+To terminate daemon:
+
+`$ pidof simple_daemon`
+
+and then with obtained pid
+
+`$ kill -TERM pid`
+
 ## Build and run test
 
 Testing made with Google Test
