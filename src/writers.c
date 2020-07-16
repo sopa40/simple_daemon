@@ -51,6 +51,10 @@ int write_current_state(int status_level)
         LOGI("Error obtaining info");
         return -1;
     }
+    if (status_level < MIN_STATUS_LEVEL || status_level > MAX_STATUS_LEVEL){
+        LOGI("Wrong status_level for logging!");
+        return -2;
+    }
     LOGI("Seconds since boot %ld", info.uptime);
     if (status_level > 1)
         LOGI("Total memory: %lu", info.totalram);

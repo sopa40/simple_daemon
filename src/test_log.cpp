@@ -70,3 +70,9 @@ TEST_F(MyTest, write_ok_state) {
     ASSERT_NE(return_val, -1)  << "Error obtaining logging information";
     ASSERT_EQ(return_val, 0)  << "Some other error";
 }
+
+TEST_F(MyTest, fail_write_state) {
+    int return_val = write_current_state(0);
+    ASSERT_NE(return_val, -1)  << "Error obtaining logging information";
+    ASSERT_EQ(return_val, -2)  << "Status level is not checked";
+}

@@ -24,6 +24,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define SYS_INFO_FILE "/tmp/sys_info"
 #define GET_SYS_INFO "inxi -Fxz > " SYS_INFO_FILE
 
+
+#define MIN_STATUS_LEVEL 1
+#define MAX_STATUS_LEVEL 3
+
+#define MIN_FRQNC_LEVEL 1
+#define MAX_FRQNC_LEVEL 3
+
 /*!
 * \brief                Writes system info in sys_info file in program directory
 *
@@ -37,9 +44,9 @@ int write_sys_info(void);
 /*!
 * \brief                Writes system info in /tmp/log file with time tracking
 *
-* \warning                 Information is saved in struct sysinfo. Failure is logged.ch
+* \warning              Information is saved in struct sysinfo. Failure is logged.ch
 *
-* \return               0 on success, -1 on failure
+* \return               0 on success, -1 on failure obtaining info, -2 on wrong status (logging) level
 */
 int write_current_state(int status_level);
 

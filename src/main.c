@@ -31,9 +31,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "daemonize.h"
 #include "writers.h"
 
-
-
-
 const char *argp_program_version = "simple_daemon 1.0";
 const char *argp_program_bug_address = "<hazik991@gmail.com>";
 
@@ -75,13 +72,13 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
             break;
         case 'f':
             frqnc = atoi(arg);
-            if (frqnc > 3 || frqnc < 1)
+            if (frqnc > MAX_FRQNC_LEVEL || frqnc < MIN_FRQNC_LEVEL)
                 argp_usage (state);
             arguments->frequency_level = frqnc;
             break;
         case 's':
             status = atoi(arg);
-            if (status > 3 || status < 1)
+            if (status > MAX_STATUS_LEVEL || status < MIN_STATUS_LEVEL)
                 argp_usage (state);
             arguments->status_level = status;
             break;
