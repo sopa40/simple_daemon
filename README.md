@@ -16,7 +16,7 @@ To enable logging into syslog uncomment `#DEFINES := LOG_SYSLOG` in the Makefile
 
 ## Build documentation
 
-To create documentation required Doxygen 1.8.7+. Run in project folder `doxygen dconfig`. Documentation will apper in html folder.
+To create documentation required Doxygen 1.8.7+. Run in project folder `doxygen dconfig`. Documentation will appear in html folder.
 
 No Latex is created, but you can change it in dconfig file.
 
